@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Intrusion Detection System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(99, 102, 241, 0.8),
+                rgba(168, 85, 247, 0.8),
+                transparent
+            );
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .shield-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+        }
+        
+        .header-text h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .header-text p {
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #10b981;
+            margin-top: 12px;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Stats Grid */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(99, 102, 241, 0.5),
+                transparent
+            );
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+        
+        .stat-card h3 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+        
+        .stat-card p {
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .section-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+        
+        .section-icon {
+            font-size: 28px;
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+        
+        .upload-area p {
+            color: #9ca3af;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area .hint {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 12px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: none;
+        }
+        
+        #fileName {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            color: #a5b4fc;
+            font-size: 14px;
+            display: none;
+        }
+        
+        #fileName.show {
+            display: block;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(99, 102, 241, 0.1);
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading p {
+            color: #9ca3af;
+            font-size: 15px;
+        }
+        
+        /* Results */
+        .results {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            display: none;
+        }
+        
+        .results h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 8px;
+        }
+        
+        .results-subtitle {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .result-item {
+            padding: 24px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .result-item.attack {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .result-item.benign {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .result-item.highlight {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .result-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .result-item p {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e4e4e7;
+        }
+        
+        .result-item.attack p {
+            color: #fca5a5;
+        }
+        
+        .result-item.benign p {
+            color: #6ee7b7;
+        }
+        
+        .attack-list {
+            margin-top: 32px;
+        }
+        
+        .attack-list h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 20px;
+        }
+        
+        .attack-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .attack-item:hover {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .attack-name {
+            font-weight: 600;
+            color: #e4e4e7;
+            font-size: 15px;
+        }
+        
+        .attack-count {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .attack-count span {
+            color: #fca5a5;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .attack-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .header {
+                padding: 24px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-text h1 {
+                font-size: 24px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="shield-icon">🛡️</div>
+                <div class="header-text">
+                    <h1>Network Intrusion Detection System</h1>
+                    <p>Advanced AI-powered threat detection using CIC-IDS2017 dataset</p>
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        <span>System Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <h3>15</h3>
+                <p>Attack Types</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✨</div>
+                <h3>99.80%</h3>
+                <p>Accuracy</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <h3>0.86</h3>
+                <p>Macro F1 Score</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔬</div>
+                <h3>2.8M</h3>
+                <p>Training Samples</p>
+            </div>
+        </div>
+        
+        <div class="upload-section">
+            <div class="section-header">
+                <span class="section-icon">📁</span>
+                <h2>Analyze Network Traffic</h2>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">☁️</div>
+                <p>Drag and drop your CSV file here</p>
+                <input type="file" id="fileInput" accept=".csv">
+                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                    Browse Files
+                </button>
+                <p class="hint">Supports CSV files up to 500MB</p>
+            </div>
+            <div id="fileName"></div>
+            <button class="btn" id="analyzeBtn" onclick="analyzeFile()" disabled style="margin-top: 20px;">
+                🔍 Analyze Traffic
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing network traffic patterns...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Analysis Results</h2>
+            <p class="results-subtitle">Detailed breakdown of network traffic classification</p>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const resultsContent = document.getElementById('resultsContent');
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                fileName.innerHTML = `
+                    <strong>📄 ${file.name}</strong><br>
+                    <span style="color: #6b7280; font-size: 13px;">
+                        ${(file.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                `;
+                fileName.classList.add('show');
+                analyzeBtn.disabled = false;
+            }
+        }
+        
+        async function analyzeFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            analyzeBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/predict_csv', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                alert('Error analyzing file: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        }
+        
+        function displayResults(data) {
+            const benignPct = ((data.benign_count / data.total_flows) * 100).toFixed(2);
+            
+            let html = `
+                <div class="result-grid">
+                    <div class="result-item highlight">
+                        <h4>Total Flows Analyzed</h4>
+                        <p>${data.total_flows.toLocaleString()}</p>
+                    </div>
+                    <div class="result-item benign">
+                        <h4>Benign Traffic</h4>
+                        <p>${data.benign_count.toLocaleString()} <span style="font-size: 16px; font-weight: 400;">(${benignPct}%)</span></p>
+                    </div>
+                    <div class="result-item attack">
+                        <h4>Malicious Traffic</h4>
+                        <p>${data.attack_count.toLocaleString()} <span style="font-size: 16px; font-weight: 400;">(${data.attack_percentage}%)</span></p>
+                    </div>
+                </div>
+            `;
+            
+            if (data.top_attacks && data.top_attacks.length > 0) {
+                html += `
+                    <div class="attack-list">
+                        <h3>🚨 Detected Threats</h3>
+                `;
+                
+                data.top_attacks.forEach(([attack, count], index) => {
+                    const pct = ((count / data.total_flows) * 100).toFixed(2);
+                    html += `
+                        <div class="attack-item">
+                            <div class="attack-name">
+                                <span style="color: #6b7280; margin-right: 8px;">${index + 1}.</span>
+                                ${attack}
+                            </div>
+                            <div class="attack-count">
+                                <span>${count.toLocaleString()}</span>
+                                <div class="attack-badge">${pct}%</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            // Add detailed breakdown
+            html += `
+                <div class="attack-list" style="margin-top: 32px;">
+                    <h3>📊 Complete Breakdown</h3>
+            `;
+            
+            const sortedSummary = Object.entries(data.summary)
+                .sort((a, b) => b[1].count - a[1].count);
+            
+            sortedSummary.forEach(([attackType, info]) => {
+                const isAttack = attackType !== 'BENIGN';
+                html += `
+                    <div class="attack-item" style="${isAttack ? '' : 'border-color: rgba(16, 185, 129, 0.3);'}">
+                        <div class="attack-name" style="${isAttack ? '' : 'color: #6ee7b7;'}">
+                            ${attackType}
+                        </div>
+                        <div class="attack-count">
+                            <span style="${isAttack ? '' : 'color: #6ee7b7;'}">${info.count.toLocaleString()}</span>
+                            <div class="attack-badge" style="${isAttack ? '' : 'background: rgba(16, 185, 129, 0.2); color: #6ee7b7;'}">
+                                ${info.percentage}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            resultsContent.innerHTML = html;
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
